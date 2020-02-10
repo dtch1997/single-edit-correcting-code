@@ -72,8 +72,6 @@ class SingleEditCode:
             return xp
 
         ap = xp.syndrome % (4*n + 1)
-        bp = xp.signature.syndrome % P
-        cp = xp.signature.parity_check 
         dp = xp.sum % 7
         
         if R4p.asint() == dp:
