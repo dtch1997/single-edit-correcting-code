@@ -7,7 +7,6 @@ Created on Tue Feb  4 23:52:06 2020
 
 
 from dnacode import *
-from find_sum_balanced import *
 from util import *
 import unittest
 import numpy as np
@@ -39,13 +38,26 @@ class TestEncode(unittest.TestCase):
         """
         Run tests on sequences of 1s and 2s, which will (almost) always be sum-balanced. 
         """
-        for i in range(100):
+        for i in range(1000):
             x = QaryString(4, np.random.randint(1, 3, 256))
             code = SingleEditCode()
             x_enc, n, N = code.encode(x)
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="substitute")
             x_pred = code.decode(x_enc_m, n, N)
             self.assertTrue(x_pred == x)
+            
+    def test1_fixed(self):
+        """
+        Run tests on a fixed sequence which we know to be sum balanced
+        """
+        for i in range(1000):
+            x = QaryString(4, np.array([0,1,2,3]*10))
+            code = SingleEditCode()
+            x_enc, n, N = code.encode(x)
+            x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="substitute")
+            x_pred = code.decode(x_enc_m, n, N)
+            self.assertTrue(x_pred == x)
+        
         
 if __name__ == "__main__":
     unittest.main()
