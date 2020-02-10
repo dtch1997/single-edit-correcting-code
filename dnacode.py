@@ -45,7 +45,7 @@ class SingleEditCode:
         x_enc = x.concatenate([M, R1, R2, R3, R4])
         return x_enc, n, x_enc.length
     
-    def decode(self, x_enc, n, N):
+    def decode(self, x_enc, n, N, verbose=False):
         """
         n:  int. Length of un-encoded message. 
         N:  int. Length of un-mutated encoded message. 
@@ -54,7 +54,7 @@ class SingleEditCode:
         """
         assert N-1 <= x_enc.length <= N+1
         if x_enc.length == N:
-            return self._decode_substitution(x_enc, n)
+            return self._decode_substitution(x_enc, n, verbose)
         elif x_enc.length == N+1:
             return self._decode_insertion(x_enc, n)
         elif x_enc.length == N-1:
@@ -62,7 +62,7 @@ class SingleEditCode:
         # Should never reach this part
         raise Exception("x_enc has invalid length in decode()")
     
-    def _decode_substitution(self, x_enc, n):
+    def _decode_substitution(self, x_enc, n, verbose):
         k = 72 * np.ceil(np.log(n) / np.log(2))
         P = 20*k
         lengths = [n, 2, x_enc.bitlen(4*n+1), x_enc.bitlen(P), 1, 2]
@@ -79,13 +79,21 @@ class SingleEditCode:
         if R1p.asint() == ap:
             return xp
         val_change = dp - R4p.asint()
+        if val_change <= -x_enc.q: val_change += 7
+        if val_change >= x_enc.q: val_change -= 7
         sig_change = ap - R1p.asint()
-        for j in range(n):
+        for j in range(1, n+1):
             if (sig_change - j * val_change) % (4*n+1) == 0:
                 break
+            if j == n:
+                raise Exception("j not found")
+       
+        if verbose:
+            print(f"Detected a substitution at array index {j-1}")
+            print(f"Increase in value: {val_change}")
         
         x = QaryString(xp.q, xp.val)
-        x.val[j] = x.val[j] - val_change
+        x.val[j-1] = x.val[j-1] - val_change
         return x
     
     def _decode_deletion(self, x_enc):

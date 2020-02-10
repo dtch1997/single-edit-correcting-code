@@ -15,6 +15,10 @@ class QaryString:
         self.q = q
         self.val = val.astype(np.int8)
         
+    """
+    Core methods
+    """
+        
     @property
     def length(self):
         return self.val.shape[0]
@@ -41,6 +45,12 @@ class QaryString:
         vals = vals[::-1]
         return QaryString(self.q, val=np.array(vals))
     
+
+    
+    """
+    Convenience methods
+    """
+    
     def pad_to(self, length, val=0, at="front"):
         if length < self.length:
             return self
@@ -63,10 +73,6 @@ class QaryString:
             parts.append(self[idx: idx + l])
             idx = idx + l
         return tuple(parts)
-    
-    """
-    Convenience functions
-    """
         
     def __len__(self):
         return self.val.shape[0]
@@ -87,26 +93,28 @@ class QaryString:
         return (self.q == other.q and np.all(self.val == other.val))
     
     """
-    Convenience functions for performing the encoding
+    Methods for performing the encoding
     """
-    def mutate(self, m = 1, type="random"):
-        """
-
-        Parameters
-        ----------
-        m :    int
-               How many . The default is 1.
-        type:  "random". "insertion", "deletion", "substitution"
-            
-
-        Returns
-        -------
-        The mutated q-ary string. 
-
-        """
+    def mutate(self, mtype="random"):
+        pos = np.random.randint(low=0, high=self.length)
+        val = np.copy(self.val)
         
-        
-        return 
+        mtypes = ["substitute", "insert", "delete"]
+        if mtype == "random":
+            mtype = np.random.choice(mtypes)
+        if mtype == "substitute":
+            allowed_symbols = [i for i in range(self.q)]
+            allowed_symbols.remove(val[pos])
+            val[pos] = np.random.choice(allowed_symbols)
+            symbol = val[pos]
+        elif mtype == "insert":
+            symbol = np.random.randint(low=0, high=self.q)
+            val = np.insert(val, pos, symbol)
+        elif mtype == "delete":
+            val = np.delete(val, pos)
+            symbol = None
+        return QaryString(self.q, val), mtype, pos, symbol
+         
     
     @property
     def syndrome(self):
@@ -132,6 +140,8 @@ class QaryString:
         return r.concatenate([r])
     
 if __name__ == "__main__":
-    x = QaryString(val = np.zeros(2))
-    print(x)
+    for i in range(100):
+        x = QaryString(val = np.zeros(2))
+        xm, mtype = x.mutate()
+        print(xm, mtype)
     

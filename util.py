@@ -14,7 +14,7 @@ def syndrome(x):
     n: Modulus of the syndrom. 
     """
     assert len(x.shape) == 1
-    r = np.arange(x.shape[0])
+    r = np.arange(x.shape[0]) + 1
     return np.sum(x * r)
 
 def signature(x):
