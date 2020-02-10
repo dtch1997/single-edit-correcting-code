@@ -2,11 +2,11 @@
 
 Implements an order-optimal code for correcting single edits in a quartenary alphabet, described [here](https://arxiv.org/pdf/1910.06501.pdf)
 
-# Encoding Scheme
+## Encoding Scheme
 
 The encoder needs to encode an arbitrary string **x** to a k-sum-balanced string **y**, then appends various checksums to **y** to create a final string **z**, which is sent over some noisy channel.  
 
-# Status
+## Status
 
 - [x] Implement utility code for working with q-ary strings. 
 - [x] Implement code for encoding **y** to **z**
