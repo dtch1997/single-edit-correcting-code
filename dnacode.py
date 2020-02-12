@@ -28,8 +28,8 @@ class SingleEditCode:
         x_enc = None
         n = x.length
         
-        k = 72 * np.ceil(np.log(n) / np.log(2))
-        P = 20*k
+        k = self._get_k(n)
+        P = self._get_P(n)
         
         a = x.syndrome % (4*n + 1)
         b = x.signature.syndrome % P
@@ -63,8 +63,8 @@ class SingleEditCode:
         raise Exception("x_enc has invalid length in decode()")
     
     def _decode_substitution(self, x_enc, n, verbose):
-        k = 72 * np.ceil(np.log(n) / np.log(2))
-        P = 20*k
+        k = self._get_k(n)
+        P = self._get_P(n)
         lengths = [n, 2, x_enc.bitlen(4*n+1), x_enc.bitlen(P), 1, 2]
         
         xp, Mp, R1p, R2p, R3p, R4p = x_enc.split(lengths)
@@ -96,11 +96,17 @@ class SingleEditCode:
         x.val[j-1] = x.val[j-1] - val_change
         return x
     
-    def _decode_deletion(self, x_enc):
+    def _decode_deletion(self, x_enc, n):
         pass
     
     def _decode_insertion(self, x_enc):
         pass
+    
+    def _get_k(self, n):
+        return 72 * np.ceil(np.log(n) / np.log(2))
+    
+    def _get_P(self, n):
+        return 20*self._get_k(n)
     
 if __name__ == "__main__":
     x = QaryString(4, np.array([1,1,2,2,1,1,2,2]))
