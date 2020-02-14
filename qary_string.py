@@ -13,6 +13,10 @@ class QaryString:
     def __init__(self, q : int = 4, 
                        val = np.zeros(shape=0, dtype=np.int8)):
         self.q = q
+        if type(val) == int or type(val) == np.int8:
+            val = [val]
+        if type(val) == list:
+            val = np.array(val)
         self.val = val.astype(np.int8)
         
     """
@@ -70,12 +74,16 @@ class QaryString:
         parts = []
         idx = 0
         for i, l in enumerate(lengths):
+            assert l >= 0
             parts.append(self[idx: idx + l])
             idx = idx + l
         return tuple(parts)
+    
+    def randomize(self, n):
+        return QaryString(self.q, np.random.randint(low=0, high=self.q, size=n))
         
     def __len__(self):
-        return self.val.shape[0]
+        return self.length
     
     def __str__(self):
         return f"q = {self.q}, val = {self.val}"
@@ -90,6 +98,8 @@ class QaryString:
         self.val.__delitem__(item)
         
     def __eq__(self, other):
+        if type(other) == int:
+            return self.length == 1 and self.val[0] == other
         return (self.q == other.q and np.all(self.val == other.val))
     
     """
@@ -111,10 +121,25 @@ class QaryString:
             symbol = np.random.randint(low=0, high=self.q)
             val = np.insert(val, pos, symbol)
         elif mtype == "delete":
-            val = np.delete(val, pos)
-            symbol = None
+            symbol = val[pos]
+            val = np.delete(val, pos)            
         return QaryString(self.q, val), mtype, pos, symbol
-         
+    
+    def _insert(self, pos, symbol, idx_of_pos=0):
+        """
+        idx_of_pos: If 1, pos is 1-indexed. If 0, pos is 0-indexed.  
+        """
+        val = np.insert(self.val, pos-idx_of_pos, symbol)
+        return QaryString(self.q, val)
+    
+    def _delete(self, pos, idx_of_pos=0):
+        val = np.delete(self.val, pos-idx_of_pos)
+        return QaryString(self.q, val)
+    
+    def _substitute(self, pos, symbol, idx_of_pos=0):
+        val = np.copy(self.val)
+        val[pos-idx_of_pos] = symbol
+        return QaryString(self.q, val)
     
     @property
     def syndrome(self):
