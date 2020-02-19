@@ -18,7 +18,7 @@ def first_index_k_zeros_left(qstr, k, P):
         if (num_zeros_left - k) % P == 0:
             return j
         if j == qstr.length: 
-            raise Exception("Should never reach here")
+            raise Exception("No valid position found")
         if qstr[j] == 0:
             num_zeros_left += 1
             
@@ -32,7 +32,7 @@ def first_index_k_ones_right(qstr, k, P):
         if (num_ones_right - k) % P == 0:
             return j
         if j == 0: 
-            raise Exception("Should never reach here")
+            raise Exception("No valid position found")
         if qstr[j-1] == 1:
             num_ones_right += 1
 
@@ -60,9 +60,9 @@ class SVTCode:
         P: upper bound on number of positions where deletion could have occurred. 
         delval: deleted symbol. One of 0,1
         """
-        P = min(P, y.length - u + 2)
-        lengths = [u-1, P-1, y.length-u-P+2]
-        if verbose: print(lengths)
+        q = min(P, y.length - u + 2)
+        lengths = [u-1, q-1, y.length-u-q+2]
+        if verbose: print(f"Splitting string into lengths of: {lengths}")
         yhead, yhat, ytail = y.split(lengths)
         if verbose: print(f"yhead = {yhead} \nyhat = {yhat} \nytail = {ytail}")        
         if verbose: print(f"Running SVT decode with u = {u}, P={P}, delval={delval}, a={a}")
@@ -109,8 +109,8 @@ class SVTCode:
         P: upper bound on number of positions where insertion could have occurred. 
         insval: inserted symbol. One of 0,1
         """
-        P = min(P, y.length - u + 1)
-        lengths = [u-1, P, y.length-u-P+1]
+        q = min(P, y.length - u + 1)
+        lengths = [u-1, q, y.length-u-q+1]
         if verbose: print(f"Splitting y according to lengths {lengths}")
         yhead, yhat, ytail = y.split(lengths)
         if verbose: print(f"yhead = {yhead} \nyhat = {yhat} \nytail = {ytail}")        
@@ -137,16 +137,3 @@ class SVTCode:
 
         yhat = yhat._delete(inspos)
         return yhead.concatenate(yhat).concatenate(ytail)
-    
-    
-    
-if __name__ == "__main__":
-    y = QaryString(q=2, val=[0,1]*5)
-    pos = 4
-    symbol = 1
-    y_ins = y._insert(pos, symbol, idx_of_pos=1)
-    print(f"Inserted symbol {symbol} at {pos}")
-    print(f"Mutated sequence {y_ins}")
-    y_pred = SVTCode().decode_insertion(y_ins, y.syndrome, pos, 3, symbol, verbose=True)
-    print(f"Predicted {y_pred}")
-        

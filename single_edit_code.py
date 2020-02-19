@@ -116,9 +116,11 @@ class SingleEditCode:
         if verbose: print(f"Deletion of symbol {xp_deleted_symbol} detected.")
         
         Js = []
+        # 1-indexed positions where the deletion could have happened. 
         for j in range(1, n+1):
             if (ap + j*xp_deleted_symbol + xp[j-1:].sum) % (4*n+1) == R1p.asint() % (4*n+1):
                 Js.append(j)
+        if verbose: print(f"Possible locations: {Js}")
         
         Jp = set()
         for j in Js:
@@ -131,7 +133,7 @@ class SingleEditCode:
             
         if verbose: print(f"Possible deletion locations: {Jp}")
         u = min(Jp)
-        if verbose: print(P)
+        if verbose: print(f"P = {P}")
         sig_deleted_symbol = (cp - R3p.asint()) % 2
         sig = SVTCode().decode_deletion(xp.signature, R2p.asint(), u, P, sig_deleted_symbol, verbose=verbose)
         
@@ -144,8 +146,54 @@ class SingleEditCode:
         
                     
     def _decode_insertion(self, x_enc, n, verbose):
-        pass
-    
+        if verbose: 
+            print("Insertion detected.")
+            print("Computing parameters...")
+        k = self._get_k(n)
+        P = self._get_P(n)
+        lengths = [n+1, 2, x_enc.bitlen(4*n+1), x_enc.bitlen(P), 1, 2]
+        xp, Mp, R1p, R2p, R3p, R4p = x_enc.split(lengths)
+        if xp[-1] == Mp[0]:
+            return xp[:-1]
+        
+        ap = xp.syndrome % (4*n + 1)
+        cp = xp.signature.parity_check
+        dp = xp.sum % 7
+        xp_inserted_symbol = (dp - R4p.asint()) % 7
+        if verbose: print(f"Insertion of symbol {xp_inserted_symbol} detected.")
+        
+        Js = []
+        # 1-indexed positions where insertion could have occured
+        for j in range(1, n+2):
+            if xp.val[j-1] == xp_inserted_symbol and \
+            (ap - j*xp_inserted_symbol - xp[j:].sum) % (4*n+1) == R1p.asint() % (4*n+1):
+                Js.append(j)
+        if verbose: print(f"Possible locations: {Js}")
+        
+        Jp = set()
+        for j in Js:
+            Jj = set()
+            xp_j = xp._delete(j, idx_of_pos=1)
+            for jp in range(1,xp.signature.length +1):
+                if xp_j.signature == xp.signature._delete(jp, idx_of_pos=1):
+                    Jj.add(jp)
+            Jp = Jp.union(Jj)
+        if verbose: print(f"Possible insertion locations: {Jp}")
+        u = min(Jp)
+        if verbose: print(f"P = {P}")
+        
+        sig_inserted_symbol = (cp - R3p.asint()) % 2
+        sig = SVTCode().decode_insertion(xp.signature, R2p.asint(), u, P, sig_inserted_symbol, verbose=verbose)
+        
+        for j in Js:
+            x_candidate = xp._delete(j, idx_of_pos=1)
+            if x_candidate.signature == sig:
+                return x_candidate
+            
+        raise Exception("SingleEditCode could not decode the given string")
+        
+                
+                
     def _get_k(self, n):
         return 4
         # return 72 * np.ceil(np.log(n) / np.log(2))
@@ -154,14 +202,12 @@ class SingleEditCode:
         return 20*self._get_k(n)
     
 if __name__ == "__main__":
-    x = QaryString(4, np.random.randint(low=1, high=3, size=2000))
-    code = SingleEditCode()
-    x_enc, n, N = code.encode(x)
-    # x_enc_p = x_enc._delete(3, idx_of_pos=1)
-    x_enc_p, mtype, pos, symbol = QaryString(x_enc.q, x_enc.val).mutate("delete")
-    # print(f"Encoded string: {x_enc}") 
-    # print(f"Mutated string: {x_enc_p}")
-    print(f"Mutation {mtype} at position {pos+1} of symbol {symbol}")
-    
-    x_pred = code.decode(x_enc_p, n, N, verbose=False)
-    print(x_pred == x)
+    for i in range(1000):
+        x = QaryString(4, np.array([0,1,2,3]*10))
+        code = SingleEditCode()
+        x_enc, n, N = code.encode(x)
+        x_enc_m, _, pos, symbol = x_enc.mutate(mtype="insert")
+        print(f"Ground truth: Insertion of {symbol} at {pos + 1}")
+        x_pred = code.decode(x_enc_m, n, N, verbose=False)
+        assert x_pred == x
+            
