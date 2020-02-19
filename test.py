@@ -6,7 +6,7 @@ Created on Tue Feb  4 23:52:06 2020
 """
 
 
-from dna_code import *
+from single_edit_code import *
 from util import *
 from svt_code import *
 import unittest
