@@ -8,6 +8,8 @@ The encoder needs to encode an arbitrary string **s** to a k-sum-balanced string
 
 ## Status
 
+
+### Encoder
 - [x] Implement utility code for working with q-ary strings. 
 - [x] Implement code for encoding **x** to **x_enc**
 - [x] Implement code for decoding a single substitution in **x_enc**
@@ -15,3 +17,7 @@ The encoder needs to encode an arbitrary string **s** to a k-sum-balanced string
 - [x] Implement code for decoding a single insertion in **x_enc**
 - [ ] Implement code for encoding **s** to **x**
 - [ ] Implement code for decoding **x** to **s** 
+
+### Miscellaneous
+- [ ] Update README with documentation on how to use code
+- [ ] Update README with explanation of the encoding scheme
