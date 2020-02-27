@@ -105,7 +105,6 @@ class SingleEditCode:
         if verbose: 
             print("Deletion detected.")
             print("Computing parameters...")
-        k = self._get_k(n)
         P = self._get_P(n)
         lengths = [n-1, 2, x_enc.bitlen(4*n+1), x_enc.bitlen(P), 1, 2]
         xp, Mp, R1p, R2p, R3p, R4p = x_enc.split(lengths)
@@ -153,7 +152,6 @@ class SingleEditCode:
         if verbose: 
             print("Insertion detected.")
             print("Computing parameters...")
-        k = self._get_k(n)
         P = self._get_P(n)
         lengths = [n+1, 2, x_enc.bitlen(4*n+1), x_enc.bitlen(P), 1, 2]
         xp, Mp, R1p, R2p, R3p, R4p = x_enc.split(lengths)
