@@ -13,21 +13,23 @@ class SumBalancedCode:
     """
     Applies a trivial encoding that guarantees k-sum-balancedness
     """
-    def __init__(self, q: int):
-        self.q = q
+    def __init__(self):
+        pass
         
-    def encode(self, x):
+    @staticmethod
+    def encode(x):
         """
         x: QaryString
         """
         # Append the inverse of every element. 
         vals = np.zeros([x.length, 2])
         vals[:,0] = x.val
-        vals[:,1] = (self.q-1) - x.val
+        vals[:,1] = (x.q-1) - x.val
         vals = vals.flatten()
-        return QaryString(self.q, np.array(vals))
+        return QaryString(x.q, np.array(vals))
     
-    def decode(self, x):
+    @staticmethod
+    def decode(x):
         # Return elements 0, 2, 4, ... 
         idx = np.arange(start=0, stop=x.length, step=2)
         return x[idx]

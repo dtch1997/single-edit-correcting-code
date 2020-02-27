@@ -9,6 +9,7 @@ import numpy as np
 import util
 from qary_string import QaryString
 from svt_code import SVTCode
+from sum_balanced_code import SumBalancedCode
 from typing import List
 
 class SingleEditCode:
@@ -19,13 +20,14 @@ class SingleEditCode:
         """
         Parameters
         ----------
-        x : balanced QaryString of length (n)
+        x : QaryString of length (n)
 
         Returns
         -------
         x_enc : QaryString of length (N)
 
         """
+        x = SumBalancedCode.encode(x)        
         x_enc = None
         n = x.length
         
@@ -56,13 +58,15 @@ class SingleEditCode:
         if verbose: print("Beginning decoding...")
         assert N-1 <= x_enc.length <= N+1
         if x_enc.length == N:
-            return self._decode_substitution(x_enc, n, verbose)
+            x_dec_ksumbalanced = self._decode_substitution(x_enc, n, verbose)
         elif x_enc.length == N+1:
-            return self._decode_insertion(x_enc, n, verbose)
+            x_dec_ksumbalanced = self._decode_insertion(x_enc, n, verbose)
         elif x_enc.length == N-1:
-            return self._decode_deletion(x_enc, n, verbose)
-        # Should never reach this part
-        raise Exception("x_enc has invalid length in decode()")
+            x_dec_ksumbalanced = self._decode_deletion(x_enc, n, verbose)
+        else: 
+            raise Exception("x_enc has invalid length in decode()")
+        return SumBalancedCode.decode(x_dec_ksumbalanced)
+            
     
     def _decode_substitution(self, x_enc, n, verbose):
         k = self._get_k(n)
@@ -192,8 +196,6 @@ class SingleEditCode:
             
         raise Exception("SingleEditCode could not decode the given string")
         
-                
-                
     def _get_k(self, n):
         return 4
         # return 72 * np.ceil(np.log(n) / np.log(2))

@@ -98,6 +98,16 @@ class TestSingleEditCode(unittest.TestCase):
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="insert")
             x_pred = code.decode(x_enc_m, n, N)
             self.assertTrue(x_pred == x)
+            
+    def test_comprehensive(self):
+        for i in range(1000):
+            x = QaryString(4, np.random.randint(4, 1024))
+            code = SingleEditCode()
+            x_enc, n, N = code.encode(x)
+            x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="insert")
+            x_pred = code.decode(x_enc_m, n, N)
+            self.assertTrue(x_pred == x)
+            
 
 class TestSVTCode(unittest.TestCase):
     def test1_delete_fixed_short(self):
