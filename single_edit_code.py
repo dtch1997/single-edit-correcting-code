@@ -9,7 +9,7 @@ import numpy as np
 import util
 from qary_string import QaryString
 from svt_code import SVTCode
-from sum_balanced_code import SumBalancedCode
+from sum_balanced_code import SimpleCode
 from typing import List
 
 class SingleEditCode:
@@ -27,7 +27,7 @@ class SingleEditCode:
         x_enc : QaryString of length (N)
 
         """
-        x = SumBalancedCode.encode(x)        
+        x = SimpleCode.encode(x)        
         x_enc = None
         n = x.length
         
@@ -65,7 +65,7 @@ class SingleEditCode:
             x_dec_ksumbalanced = self._decode_deletion(x_enc, n, verbose)
         else: 
             raise Exception("x_enc has invalid length in decode()")
-        return SumBalancedCode.decode(x_dec_ksumbalanced)
+        return SimpleCode.decode(x_dec_ksumbalanced)
             
     
     def _decode_substitution(self, x_enc, n, verbose):

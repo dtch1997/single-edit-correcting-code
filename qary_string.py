@@ -164,9 +164,26 @@ class QaryString:
         r = QaryString(self.q, val=np.array([r]))
         return r.concatenate([r])
     
+    """
+    Convenience functions for encoding as k-sum-balanced strings
+    """
+    def as_binary_matrix(self):
+        logq = np.ceil(np.log(self.q) / np.log(2)).astype(self.val.dtype)
+        m = np.zeros([self.length, logq], dtype=self.val.dtype)
+        for i in range(self.length):
+            m[i,:] = np.array(list(bin(self.val[i]))[2:])
+        return self.q, m
+    
+    @staticmethod
+    def from_binary_matrix(q, m):
+        val = [QaryString(2, m[i]).asint() for i in range(m.shape[0])]
+        return QaryString(q, val)
+                
+    
+    
 if __name__ == "__main__":
-    for i in range(100):
-        x = QaryString(val = np.zeros(2))
-        xm, mtype = x.mutate()
-        print(xm, mtype)
+    x = QaryString(q = 8, val = np.zeros([5]))
+    q, m = x.as_binary_matrix()
+    xp = QaryString.from_binary_matrix(q, m)
+    print(xp)
     
