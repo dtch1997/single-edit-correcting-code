@@ -34,9 +34,9 @@ The original paper proves that an arbitrary string **s** can be encoded into a k
 
 1. Move a sliding window of length **k** over **s**. At each position, we look for "forbidden words" which are not k-sum-balanced. 
 2. If a **k**-slice **w** is not k-sum-balanced, we encode it with a tuple of `rep_w = (ind_w, pos, 3)` where: 
-    a. **ind_w** is the index of **w** in an enumeration of all forbidden words **w**
-    b. **pos** describes the position where **w** was found
-    c. 3 is an end-of-block marker symbol. 
+    * **ind_w** is the index of **w** in an enumeration of all forbidden words **w**
+    * **pos** describes the position where **w** was found
+    * 3 is an end-of-block marker symbol. 
 3. We can then remove **w** from the sequence and append `rep_w` to the tail of the sequence.
 
 This process can be repeated until no forbidden words remain in the sequence.  
