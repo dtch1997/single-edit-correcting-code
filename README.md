@@ -18,5 +18,5 @@ The main innovation is the k-sum-balanced string, which is a core component of t
 
 ## Contact
 
-Questions about the code's theoretical guarantees can be directed to hmkiah@ntu.edu.sg
+Questions about the code's theoretical guarantees can be directed to hmkiah@ntu.edu.sg  
 Questions about bugs or implementation errors can be directed to dtch1997@stanford.edu
