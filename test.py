@@ -43,9 +43,9 @@ class TestSingleEditCode(unittest.TestCase):
         for i in range(10):
             x = QaryString(4, np.random.randint(1, 3, 2048))
             code = SingleEditCode()
-            x_enc, n, N = code.encode(x)
+            x_enc, n, N, l = code.encode(x)
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="substitute")
-            x_pred = code.decode(x_enc_m, n, N)
+            x_pred = code.decode(x_enc_m, n, N, l)
             self.assertTrue(x_pred == x)
             
     def test1_substitute_fixed(self):
@@ -55,9 +55,9 @@ class TestSingleEditCode(unittest.TestCase):
         for i in range(1000):
             x = QaryString(4, np.array([0,1,2,3]*10))
             code = SingleEditCode()
-            x_enc, n, N = code.encode(x)
+            x_enc, n, N, l = code.encode(x)
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="substitute")
-            x_pred = code.decode(x_enc_m, n, N)
+            x_pred = code.decode(x_enc_m, n, N, l)
             self.assertTrue(x_pred == x)
              
     def test1_delete_fixed(self):
@@ -65,9 +65,9 @@ class TestSingleEditCode(unittest.TestCase):
         for i in range(1000):
             x = QaryString(4, np.array([0,1,2,3]*10))
             code = SingleEditCode()
-            x_enc, n, N = code.encode(x)
+            x_enc, n, N, l = code.encode(x)
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="delete")
-            x_pred = code.decode(x_enc_m, n, N)
+            x_pred = code.decode(x_enc_m, n, N, l)
             self.assertTrue(x_pred == x)
 
     def test_delete_seq12(self):
@@ -75,9 +75,9 @@ class TestSingleEditCode(unittest.TestCase):
         for i in range(10):
             x = QaryString(4, np.random.randint(1, 3, 2048))
             code = SingleEditCode()
-            x_enc, n, N = code.encode(x)
+            x_enc, n, N, l = code.encode(x)
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="delete")
-            x_pred = code.decode(x_enc_m, n, N)
+            x_pred = code.decode(x_enc_m, n, N, l)
             self.assertTrue(x_pred == x)
             
     def test1_insert_fixed(self):
@@ -85,9 +85,9 @@ class TestSingleEditCode(unittest.TestCase):
         for i in range(1000):
             x = QaryString(4, np.array([0,1,2,3]*10))
             code = SingleEditCode()
-            x_enc, n, N = code.encode(x)
+            x_enc, n, N, l = code.encode(x)
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="insert")
-            x_pred = code.decode(x_enc_m, n, N)
+            x_pred = code.decode(x_enc_m, n, N, l)
             self.assertTrue(x_pred == x)
 
     def test_insert_seq12(self):
@@ -95,18 +95,18 @@ class TestSingleEditCode(unittest.TestCase):
         for i in range(10):
             x = QaryString(4, np.random.randint(1, 3, 2048))
             code = SingleEditCode()
-            x_enc, n, N = code.encode(x)
+            x_enc, n, N, l = code.encode(x)
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="insert")
-            x_pred = code.decode(x_enc_m, n, N)
+            x_pred = code.decode(x_enc_m, n, N, l)
             self.assertTrue(x_pred == x)
             
     def test_comprehensive(self):
         for i in range(1000):
             x = QaryString(4, np.random.randint(4, 1024))
             code = SingleEditCode()
-            x_enc, n, N = code.encode(x)
+            x_enc, n, N, l = code.encode(x)
             x_enc_m, mtype, pos, symbol = x_enc.mutate(mtype="insert")
-            x_pred = code.decode(x_enc_m, n, N)
+            x_pred = code.decode(x_enc_m, n, N, l)
             self.assertTrue(x_pred == x)
             
 

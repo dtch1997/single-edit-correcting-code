@@ -9,12 +9,17 @@ import numpy as np
 import util
 from qary_string import QaryString
 from svt_code import SVTCode
-from sum_balanced_code import SimpleCode
+from sum_balanced_code import SumBalancedCode
 from typing import List
 
 class SingleEditCode:
-    def __init__(self):
-        pass
+    def __init__(self, k: int = 16):
+        if type(k) is not int:
+            raise Exception("SingleEditCode requires integer k")
+        if k >= 36: 
+            raise Exception("The current implementation does not support k >= 36")
+        self.k = k
+        self.sbcode = SumBalancedCode(k)
     
     def encode(self, x):
         """
@@ -27,12 +32,14 @@ class SingleEditCode:
         x_enc : QaryString of length (N)
 
         """
-        x = SimpleCode.encode(x)        
+        
+        x, l = self.sbcode.encode(x)        
         x_enc = None
         n = x.length
         
-        k = self._get_k(n)
-        P = self._get_P(n)
+        k = self.k
+        P = 20*k
+        
         
         a = x.syndrome % (4*n + 1)
         b = x.signature.syndrome % P
@@ -46,9 +53,9 @@ class SingleEditCode:
         R4 = x.fromint(d).pad_to(2)
         
         x_enc = x.concatenate([M, R1, R2, R3, R4])
-        return x_enc, n, x_enc.length
+        return x_enc, n, x_enc.length, l
     
-    def decode(self, x_enc, n, N, verbose=False):
+    def decode(self, x_enc, n, N, l, verbose=False):
         """
         n:  int. Length of un-encoded message. 
         N:  int. Length of un-mutated encoded message. 
@@ -65,12 +72,12 @@ class SingleEditCode:
             x_dec_ksumbalanced = self._decode_deletion(x_enc, n, verbose)
         else: 
             raise Exception("x_enc has invalid length in decode()")
-        return SimpleCode.decode(x_dec_ksumbalanced)
+        return self.sbcode.decode(x_dec_ksumbalanced, l)
             
     
     def _decode_substitution(self, x_enc, n, verbose):
-        k = self._get_k(n)
-        P = self._get_P(n)
+        k = self.k
+        P = 20*k
         lengths = [n, 2, x_enc.bitlen(4*n+1), x_enc.bitlen(P), 1, 2]
         xp, Mp, R1p, R2p, R3p, R4p = x_enc.split(lengths)
         if Mp[0] != Mp[1]:
@@ -193,23 +200,21 @@ class SingleEditCode:
                 return x_candidate
             
         raise Exception("SingleEditCode could not decode the given string")
-        
+
     def _get_k(self, n):
-        return 4
+        return self.k
         # return 72 * np.ceil(np.log(n) / np.log(2))
     
     def _get_P(self, n):
         return 20*self._get_k(n)
-    
-if __name__ == "__main__":
 
     
+if __name__ == "__main__":    
     for i in range(1000):
         x = QaryString(4, np.array([0,1,2,3]*10))
-        code = SingleEditCode()
-        x_enc, n, N = code.encode(x)
+        code = SingleEditCode(35)
+        x_enc, n, N, l = code.encode(x)
         x_enc_m, _, pos, symbol = x_enc.mutate(mtype="insert")
-        print(f"Ground truth: Insertion of {symbol} at {pos + 1}")
-        x_pred = code.decode(x_enc_m, n, N, verbose=False)
+        x_pred = code.decode(x_enc_m, n, N, l, verbose=False)
         assert x_pred == x
             
