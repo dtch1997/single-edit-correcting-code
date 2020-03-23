@@ -6,7 +6,7 @@ Created on Tue Feb 11 22:19:12 2020
 """
 
 
-from qary_string import QaryString
+from .qary_string import QaryString
 
 def first_index_k_zeros_left(qstr, k, P):
     """

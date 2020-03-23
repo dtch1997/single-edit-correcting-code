@@ -6,7 +6,7 @@ Created on Sat Feb  8 00:55:22 2020
 """
 
 import numpy as np
-import util
+from .util import syndrome, signature, parity_check, is_sum_balanced
 
 class QaryString:
     
@@ -38,7 +38,7 @@ class QaryString:
         sum = 0
         for i in range(len(self)):
             sum = sum * self.q
-            sum += self.val[i]
+            sum += int(self.val[i])
         return sum
     
     def fromint(self, n: int):
@@ -67,7 +67,15 @@ class QaryString:
             raise Exception("Invalid value provided for 'at'")
     
     def bitlen(self, n: int):
-        return np.ceil(np.log(n) / np.log(self.q)).astype(int)
+        # How many symbols in q-ary are required to represent n. 
+        # Approximately log_q(n)
+        # Need to calculate manually due to overflow issues
+        b = 1
+        bpow = self.q ** b
+        while bpow < n:
+            b += 1
+            bpow *= self.q
+        return b
     
     def split(self, lengths):
         assert np.sum(np.array(lengths)) == self.length
@@ -143,16 +151,16 @@ class QaryString:
     
     @property
     def syndrome(self):
-        return util.syndrome(self.val)
+        return syndrome(self.val)
     
     @property
     def signature(self):
-        return QaryString(q=2, val=util.signature(self.val))
+        return QaryString(q=2, val=signature(self.val))
     
     @property
     def parity_check(self):
         assert self.q == 2
-        return util.parity_check(self.val)
+        return parity_check(self.val)
     
     @property
     def sum(self):
@@ -167,28 +175,21 @@ class QaryString:
     """
     Convenience functions for encoding as k-sum-balanced strings
     """
+    @property
     def is_sum_balanced(self):
-        k = self.length
-        return (self.q/2-1) < self.sum / k < self.q/2 
+        return is_sum_balanced(self.val, self.q)
     
     @property
     def as_binary_matrix(self):
         logq = np.ceil(np.log(self.q) / np.log(2)).astype(self.val.dtype)
         m = np.zeros([self.length, logq], dtype=self.val.dtype)
         for i in range(self.length):
-            m[i,:] = np.array(list(bin(self.val[i]))[2:])
+            binary = list(bin(self.val[i])[2:])
+            binary = [0] * (logq - len(binary)) + binary            
+            m[i,:] = np.array(binary)
         return self.q, m
     
     @staticmethod
     def from_binary_matrix(q, m):
         val = [QaryString(2, m[i]).asint() for i in range(m.shape[0])]
         return QaryString(q, val)
-                
-    
-    
-if __name__ == "__main__":
-    x = QaryString(q = 8, val = np.zeros([5]))
-    q, m = x.as_binary_matrix
-    xp = QaryString.from_binary_matrix(q, m)
-    print(xp)
-    

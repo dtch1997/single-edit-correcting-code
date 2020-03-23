@@ -7,7 +7,8 @@ Created on Wed Feb 19 01:31:03 2020
 
 
 import numpy as np
-from qary_string import QaryString
+from .qary_string import QaryString
+from .util import is_k_sum_balanced
 from scipy.special import comb
 
 def binom(N, r):
@@ -66,11 +67,12 @@ class CombinatorialBitstringEncoder:
     @staticmethod
     def num_bitstring(k, w):
         # The number of k-length bitstrings with sum w
-        return int(binom(k, w))
+        return binom(k, w)
 
 class SumBalancedCode:
-    def __init__(self, k):
+    def __init__(self, k, q=4):
         self.k = k
+        self.q = q
         self._compute_buckets()
         
     def _compute_buckets(self, verbose=False):
@@ -86,9 +88,9 @@ class SumBalancedCode:
 
         idx = 0
         k = self.k
-        for a in range(k):
+        for a in range(k+1):
             sz_a = CombinatorialBitstringEncoder.num_bitstring(k,a)
-            for b in range(k):
+            for b in range(k+1):
                 sz_b = CombinatorialBitstringEncoder.num_bitstring(k,b)
                 if 2*a + b <= k or 2*a + b >= 2*k:
                     if verbose: print(a, b, idx)
@@ -110,12 +112,16 @@ class SumBalancedCode:
     
     def _fword_to_index(self, word):
         # word: A non-k-sum-balanced word of length k. 
-        # qary string (k,) -> binary matrix (k, q) -> bucket (q,) -> bucket index: int
-        k, index_in_bucket = CombinatorialBitstringEncoder.encode(word)
-        assert k == self.k
+        # qary string (k,) -> binary matrix (k, log2q) -> bucket (log2q,) -> bucket index: int
+
         q, bm = word.as_binary_matrix
-        sumpair = np.sum(bm, axis=0)
-        bucket = self.sumpair2bucket[tuple(sumpair)]
+        a_str, b_str = bm[:,0], bm[:,1]
+        k, a, a_index = CombinatorialBitstringEncoder.encode(a_str)
+        _, b, b_index = CombinatorialBitstringEncoder.encode(b_str)
+        num_b = CombinatorialBitstringEncoder.num_bitstring(k, b)
+        index_in_bucket = a_index * num_b + b_index
+
+        bucket = self.sumpair2bucket[(a,b)]
         return self.bucket2startidx[bucket] + index_in_bucket
     
     def _index_to_fword(self, index):
@@ -123,14 +129,21 @@ class SumBalancedCode:
         
         # First locate the bucket
         bucket = 0
-        breakpoint()
-        while self.bucket2startidx[bucket] < index:
+        while self.bucket2startidx[bucket] <= index:
             bucket += 1
+            if bucket >= len(self.bucket2startidx):
+                break
         bucket -= 1 # Maximum bucket not exceeding. 
         a,b = self.bucket2sumpair[bucket]
-        w = 2*a + b
         index_in_bucket = index - self.bucket2startidx[bucket]
-        word = CombinatorialBitstringEncoder.decode(self.k, w, index_in_bucket)
+        
+        num_b = CombinatorialBitstringEncoder.num_bitstring(self.k, b)
+        a_index = index_in_bucket // num_b
+        b_index = index_in_bucket % num_b
+        a_str = CombinatorialBitstringEncoder.decode(self.k, a, a_index)
+        b_str = CombinatorialBitstringEncoder.decode(self.k, b, b_index)
+        bm = np.stack([a_str, b_str], axis=1)
+        word = QaryString.from_binary_matrix(q=self.q, m=bm)
         return word
         
     def encode(self, s):
@@ -147,16 +160,18 @@ class SumBalancedCode:
         i = 0 # Index into x
         k = self.k
         
-        while i < x.length - k:
+        while i <= x.length - k:
             word = x[i:i+k]
             if not word.is_sum_balanced:
-                index = self._fword_to_index(word)
+                index = self._fword_to_index(word)                
                 x = x[:i].concatenate([
                     x[i+k:], 
                     QaryString(x.q).fromint(index).pad_to(x.bitlen(self._num_fwords)),
                     QaryString(x.q).fromint(i).pad_to(x.bitlen(s.length)),
                     QaryString(x.q, val=[3])
                 ])
+                rewind = min(i, k)
+                i = i - rewind
             else: 
                 i += 1
                 
@@ -169,51 +184,17 @@ class SumBalancedCode:
         Return
             x: The decoded string
         """
-        sentinel = QaryString(x.q, [0])
-        # breakpoint()        
+        sentinel = QaryString(x.q, [0])    
         lengths = [x.bitlen(self._num_fwords), x.bitlen(s_len), 1]
         block_len = np.sum(lengths)
         while x[-1] != sentinel:
-            index, i, _ = x[-block_len:].split(lengths)
-            word = self._index_to_fword(index.asint())
+            index_str, i_str, _ = x[-block_len:].split(lengths)
+            i = i_str.asint()
+            index = index_str.asint()
+            word = self._index_to_fword(index)
             x = x[:i].concatenate([
                 word, 
                 x[i:-block_len]
             ])
         x = x[:-1]
-        return x
-        
-
-class SimpleCode:
-    """
-    Applies a trivial encoding that guarantees k-sum-balancedness
-    """
-    def __init__(self):
-        pass
-        
-    @staticmethod
-    def encode(x):
-        """
-        x: QaryString
-        """
-        # Append the inverse of every element. 
-        vals = np.zeros([x.length, 2])
-        vals[:,0] = x.val
-        vals[:,1] = (x.q-1) - x.val
-        vals = vals.flatten()
-        return QaryString(x.q, np.array(vals))
-    
-    @staticmethod
-    def decode(x):
-        # Return elements 0, 2, 4, ... 
-        idx = np.arange(start=0, stop=x.length, step=2)
-        return x[idx]
-    
-    
-if __name__ == "__main__":
-    code = SumBalancedCode(16)
-    for i in range(1000):
-        s = QaryString(q=4, val=np.random.randint(low=0, high=4, size=100))
-        x, l = code.encode(s)
-        s_pred = code.decode(x, l)
-        assert s == s_pred
+        return x    

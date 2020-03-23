@@ -6,18 +6,15 @@ Created on Tue Feb  4 23:28:57 2020
 """
 
 import numpy as np
-import util
-from qary_string import QaryString
-from svt_code import SVTCode
-from sum_balanced_code import SumBalancedCode
+from .qary_string import QaryString
+from .svt_code import SVTCode
+from .sum_balanced_code import SumBalancedCode
 from typing import List
 
 class SingleEditCode:
-    def __init__(self, k: int = 16):
+    def __init__(self, k: int = 64):
         if type(k) is not int:
             raise Exception("SingleEditCode requires integer k")
-        if k >= 36: 
-            raise Exception("The current implementation does not support k >= 36")
         self.k = k
         self.sbcode = SumBalancedCode(k)
     
@@ -207,14 +204,4 @@ class SingleEditCode:
     
     def _get_P(self, n):
         return 20*self._get_k(n)
-
-    
-if __name__ == "__main__":    
-    for i in range(1000):
-        x = QaryString(4, np.array([0,1,2,3]*10))
-        code = SingleEditCode(35)
-        x_enc, n, N, l = code.encode(x)
-        x_enc_m, _, pos, symbol = x_enc.mutate(mtype="insert")
-        x_pred = code.decode(x_enc_m, n, N, l, verbose=False)
-        assert x_pred == x
             
