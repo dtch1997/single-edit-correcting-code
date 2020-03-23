@@ -30,7 +30,7 @@ The main innovation of this paper is the k-sum-balanced string, which is a core 
 
 ### Creating a k-sum-balanced string
 
-The original paper proves that an arbitrary string **s** can be encoded into a k-sum-balanced string **x** that is only one symbol longer for a sufficiently large choice of **k**. In practice, this is not trivial to implement. The following high-level procedure is used: 
+The original paper proves that an arbitrary string **s** can be encoded into a k-sum-balanced string **x** that is only one symbol longer for a sufficiently large choice of **k**. The following high-level procedure is used: 
 
 1. Move a sliding window of length **k** over **s**. At each position, we look for "forbidden words" which are not k-sum-balanced. 
 2. If a **k**-slice **w** is not k-sum-balanced, we encode it with a tuple of `rep_w = (ind_w, pos, 3)` where: 
@@ -42,6 +42,10 @@ The original paper proves that an arbitrary string **s** can be encoded into a k
 This process can be repeated until no forbidden words remain in the sequence.  
 
 The decoding proceeds in reverse: We read in blocks of `(ind_w, pos, 3)` from the tail of the sequence, recover the original **w** and insert it at the appropriate location. 
+
+### Computing index of a forbidden word
+
+The naive method of enumerating all possible forbidden words is an `O(4^k)` operation which is unacceptably long for all reasonable values of **k**. We use an index built on the [combinatorial number system](https://en.wikipedia.org/wiki/Combinatorial_number_system) to compute indices in `O(k^2)` time given `O(k^3)` precomputation time. This is a good choice because there are exponentially many possible forbidden words but only a few of them will ever be encountered in a typical message. 
 
 ## Contact
 
