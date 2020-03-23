@@ -9,6 +9,7 @@ Created on Tue Feb  4 23:52:06 2020
 from single_edit_code import *
 from util import *
 from svt_code import *
+from sum_balanced_code import *
 import unittest
 import numpy as np
 
@@ -168,5 +169,21 @@ class TestSVTCode(unittest.TestCase):
             y_pred = code.decode_insertion(yp, y.syndrome, u, 10, symbol, verbose=False)
             self.assertTrue(y_pred == y)
             
+class TestCombinatorialBitstringEncoder(unittest.TestCase):
+    def test1_random(self):          
+        for i in range(1000):
+            b = np.random.randint(low=0, high=2, size=64)
+            k, w, index = CombinatorialBitstringEncoder.encode(b)
+            b_pred = CombinatorialBitstringEncoder.decode(k,w,index)
+            self.assertTrue(np.all(b_pred == b))
+            
+class TestSumBalancedCode(unittest.TestCase):
+    code = SumBalancedCode(32)
+    for i in range(1000):
+        s = QaryString(q=4, val=np.random.randint(low=0, high=4, size=100))
+        x, l = code.encode(s)
+        s_pred = code.decode(x, l)
+        assert s == s_pred
+        
 if __name__ == "__main__":
     unittest.main()

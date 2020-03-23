@@ -202,6 +202,8 @@ class SingleEditCode:
         return 20*self._get_k(n)
     
 if __name__ == "__main__":
+
+    
     for i in range(1000):
         x = QaryString(4, np.array([0,1,2,3]*10))
         code = SingleEditCode()

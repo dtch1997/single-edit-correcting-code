@@ -167,6 +167,11 @@ class QaryString:
     """
     Convenience functions for encoding as k-sum-balanced strings
     """
+    def is_sum_balanced(self):
+        k = self.length
+        return (self.q/2-1) < self.sum / k < self.q/2 
+    
+    @property
     def as_binary_matrix(self):
         logq = np.ceil(np.log(self.q) / np.log(2)).astype(self.val.dtype)
         m = np.zeros([self.length, logq], dtype=self.val.dtype)
@@ -183,7 +188,7 @@ class QaryString:
     
 if __name__ == "__main__":
     x = QaryString(q = 8, val = np.zeros([5]))
-    q, m = x.as_binary_matrix()
+    q, m = x.as_binary_matrix
     xp = QaryString.from_binary_matrix(q, m)
     print(xp)
     
