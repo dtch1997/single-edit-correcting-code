@@ -14,8 +14,5 @@ x_enc, n, N, l = code.encode(x)
 x_enc_m, _, pos, symbol = x_enc.mutate(mtype="insert")
 x_pred = code.decode(x_enc_m, n, N, l, verbose=False)
 
-print(x)
-print(x_enc)
-
 assert x_pred == x
             
