@@ -4,9 +4,18 @@ An implementation of an order-optimal code for correcting single edits in a quar
 
 ## Getting Started
 
-First, install requirements. We only require Numpy and Scipy. The versions suggested are not hard requirements; they are only a suggestion of a working version.
+Clone the repository: 
+```
+git clone git@github.com:dtch1997/single-edit-correcting-code.git
+cd single-edit-correcting-code
+```
+Install requirements. We require `numpy` and `scipy`, as well as `nose` for testing. 
 ```
 pip install -r requirements.txt
+```
+Run the test suite.
+```
+nosetests 
 ```
 See `example.py` for sample usage of the code. 
 
