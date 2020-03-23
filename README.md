@@ -15,8 +15,8 @@ The encoder needs to encode an arbitrary string **s** to a k-sum-balanced string
 - [x] Implement code for decoding a single substitution in **x_enc**
 - [x] Implement code for decoding a single edit in **x_enc**
 - [x] Implement code for decoding a single insertion in **x_enc**
-- [ ] Implement code for encoding **s** to **x**
-- [ ] Implement code for decoding **x** to **s** 
+- [x] Implement code for encoding **s** to **x**
+- [x] Implement code for decoding **x** to **s** 
 
 ### Miscellaneous
 - [ ] Update README with documentation on how to use code
